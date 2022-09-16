@@ -2,6 +2,7 @@
 """ Console Module """
 import cmd
 import sys
+import shlex
 from models.base_model import BaseModel
 from models.__init__ import storage
 from models.user import User
@@ -112,16 +113,40 @@ class HBNBCommand(cmd.Cmd):
     def emptyline(self):
         """ Overrides the emptyline method of CMD """
         pass
+#New Code Lines
+#Function key_value_pair
+    def key_value_pair (self, args):
+        result_dict = {}
+        for arg in args:
+            result_expected =arg.split('=', 1)
+            result_key = result_expected[0]
+            result_value = result_expected[1]
+        if result_value[0] == result_value[-1] == '"':
+            result_value = shlex.split(result_value)[0].replace('_', '"')
+        else:
+            try:
+                result_value = int(result_value)
+            except:
+                try:
+                    result_value = float(result_value)
+               
+                 pass 
+                 result_dict[result_key] = result_value
+                 return result_dict
+
 
     def do_create(self, args):
         """ Create an object of any class"""
         if not args:
             print("** class name missing **")
-            return
+            return 
+        elif args[0] in HBNBCommand.classes:
+            result_dict = self.key_value_pair(args[1:])
+
         elif args not in HBNBCommand.classes:
             print("** class doesn't exist **")
             return
-        new_instance = HBNBCommand.classes[args]()
+        new_instance = HBNBCommand.classes[args][0](result_dict)
         storage.save()
         print(new_instance.id)
         storage.save()
